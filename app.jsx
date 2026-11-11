@@ -493,4 +493,40 @@ export default function App() {
             <span className="text-[10px] font-medium">Comidas</span>
           </button>
 
-          <button
+          <button 
+            onClick={() => setActiveTab('glucosa')} 
+            className={`flex flex-col items-center py-1 ${activeTab === 'glucosa' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Droplet className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium">Glucemia</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('ejercicio')} 
+            className={`flex flex-col items-center py-1 ${activeTab === 'ejercicio' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Activity className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium">Ejercicio</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('medidas')} 
+            className={`flex flex-col items-center py-1 ${activeTab === 'medidas' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Ruler className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium">Medidas</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('ajustes')} 
+            className={`flex flex-col items-center py-1 ${activeTab === 'ajustes' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Settings className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium">Ajustes</span>
+          </button>
+        </div>
+      </nav>
+
+    </div>
+  );
+}

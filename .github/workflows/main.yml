@@ -12,7 +12,7 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Configurar Java (Actualizado a v21)
+    - name: Configurar Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
@@ -24,12 +24,17 @@ jobs:
         cd trakia-app
         
         npm install
-        npm install recharts lucide-react clsx tailwind-merge framer-motion @capacitor/cli @capacitor/core @capacitor/android
+        npm install lucide-react @capacitor/cli @capacitor/core @capacitor/android
         npm install -D tailwindcss postcss autoprefixer
+        
+        npx tailwindcss init -p
         
         echo "/** @type {import('tailwindcss').Config} */" > tailwind.config.js
         echo "export default { content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], theme: { extend: {} }, plugins: [], }" >> tailwind.config.js
-        echo "@tailwind base; @tailwind components; @tailwind utilities;" > src/index.css
+        
+        echo "@tailwind base;" > src/index.css
+        echo "@tailwind components;" >> src/index.css
+        echo "@tailwind utilities;" >> src/index.css
         
         cp ../app.jsx src/App.jsx
         

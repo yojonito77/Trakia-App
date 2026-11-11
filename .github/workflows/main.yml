@@ -20,14 +20,12 @@ jobs:
 
     - name: Preparar y compilar todo
       run: |
-        npm create vite@latest trakia-app -- --template react
+        npm create vite@latest trakia-app -- --template react --yes
         cd trakia-app
         
         npm install
         npm install recharts lucide-react clsx tailwind-merge framer-motion @capacitor/cli @capacitor/core @capacitor/android
         npm install -D tailwindcss postcss autoprefixer
-        
-        npx tailwindcss init -p
         
         echo "/** @type {import('tailwindcss').Config} */" > tailwind.config.js
         echo "export default { content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], theme: { extend: {} }, plugins: [], }" >> tailwind.config.js
@@ -37,9 +35,10 @@ jobs:
         
         npm run build
         
-        npx cap init Trakia com.trakia.app --web-dir dist
-        npx cap add android
-        npx cap sync android
+        echo '{"appId": "com.trakia.app", "appName": "Trakia", "webDir": "dist"}' > capacitor.config.json
+        
+        npx --yes @capacitor/cli add android
+        npx --yes @capacitor/cli sync android
 
     - name: Generar instalador APK
       working-directory: ./trakia-app/android

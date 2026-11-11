@@ -14,7 +14,17 @@ import {
   Database
 } from 'lucide-react';
 
-// 1. MEGA CATÁLOGO UNIVERSAL (Valores cada 100g + Peso real por unidad/porción para cálculo automático en todo)
+// Lectura segura de almacenamiento local (evita pantalla en blanco si hay datos corruptos)
+const safeLoadStorage = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
+
+// 1. MEGA CATÁLOGO UNIVERSAL (Valores cada 100g + Peso real por unidad/porción para cálculo automático)
 const MEGA_FOOD_DB = [
   // HUEVOS Y PREPARACIONES CON HUEVO
   { name: 'Huevo entero de gallina', protein: 13.0, carbs: 1.1, fat: 11.0, unitWeight: 55, unitName: 'huevo(s)', keywords: 'huevo huevos duro revuelto frito poche', source: 'Base Universal USDA' },
@@ -189,7 +199,6 @@ const USDA_TRANSLATION_MAP = {
   'chocolate': 'dark chocolate 70-85%'
 };
 
-// Pesos universales por tipo de medida escrita (para que funcione incluso con alimentos traídos de internet)
 const MEASURE_WORDS_WEIGHTS = {
   'feta': 20, 'fetas': 20,
   'rebanada': 30, 'rebanadas': 30, 'rodaja': 30, 'rodajas': 30, 'tostada': 30, 'tostadas': 30,
@@ -209,14 +218,13 @@ const normalizeBase = (str) =>
 
 const singularizeWord = (word) => {
   if (word.length <= 3) return word;
-  if (word.endsWith('ces')) return word.slice(0, -3) + 'z'; // nueces -> nuez
-  if (word.endsWith('ones')) return word.slice(0, -2); // limones -> limon
+  if (word.endsWith('ces')) return word.slice(0, -3) + 'z';
+  if (word.endsWith('ones')) return word.slice(0, -2);
   if (word.endsWith('es') && !word.endsWith('tes') && !word.endsWith('les')) return word.slice(0, -2);
-  if (word.endsWith('s')) return word.slice(0, -1); // huevos -> huevo, paltas -> palta
+  if (word.endsWith('s')) return word.slice(0, -1);
   return word;
 };
 
-// Asigna automáticamente un peso por unidad inteligente a cualquier alimento que venga de internet (USDA/OpenFoodFacts)
 const inferSmartUnitWeight = (foodName) => {
   const n = normalizeBase(foodName);
   if (n.includes('huevo')) return { unitWeight: 55, unitName: 'huevo(s)' };
@@ -236,10 +244,8 @@ const inferSmartUnitWeight = (foodName) => {
   return { unitWeight: 100, unitName: 'porción(100g)' };
 };
 
-// Analizador Universal de Frases ("3 huevos", "2 fetas queso", "250g asado", "asado 200", "2 pan g4u")
 const parseUniversalInput = (rawInput) => {
   let clean = normalizeBase(rawInput);
-  // Convertir palabras numéricas comunes
   clean = clean
     .replace(/\bmedia\b|\bmedio\b/g, '0.5')
     .replace(/\buna\b|\bun\b|\buno\b/g, '1')
@@ -253,7 +259,6 @@ const parseUniversalInput = (rawInput) => {
   let explicitMeasureWeight = null;
   let explicitMeasureLabel = '';
 
-  // 1. Detectar gramos o kilos en cualquier parte: ej "250g vacio", "vacio 250 grs", "0.5 kg asado"
   const kgMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:kg|kilo|kilos)\b/);
   const gramMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:g|gr|grs|gramo|gramos|ml|cc)\b/);
 
@@ -264,16 +269,14 @@ const parseUniversalInput = (rawInput) => {
     explicitGrams = Math.round(parseFloat(gramMatch[1].replace(',', '.')));
     clean = clean.replace(gramMatch[0], ' ').trim();
   } else {
-    // 2. Detectar cantidad + medida/alimento al principio: ej "3 huevos", "2 fetas de jamon", "200 pollo"
     const startNumMatch = clean.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/);
-    // O cantidad al final (si no es porcentaje de cacao ni marca G4U): ej "huevos 3", "asado 250"
     const endNumMatch = clean.match(/^(.+?)\s+(\d+(?:[.,]\d+)?)$/);
 
     if (startNumMatch) {
       const num = parseFloat(startNumMatch[1].replace(',', '.'));
       const rest = startNumMatch[2].trim();
       if ([55, 60, 70, 80, 85, 90, 100].includes(num) && (rest.includes('chocolate') || rest.includes('cacao') || rest.includes('aguila') || rest.includes('colonial'))) {
-        // Es el porcentaje de cacao, no cantidad
+        // Es el porcentaje de cacao
       } else if (num >= 35) {
         explicitGrams = Math.round(num);
         clean = rest;
@@ -285,7 +288,7 @@ const parseUniversalInput = (rawInput) => {
       const rest = endNumMatch[1].trim();
       const num = parseFloat(endNumMatch[2].replace(',', '.'));
       if ([55, 60, 70, 80, 85, 90, 100].includes(num) && (rest.includes('chocolate') || rest.includes('cacao') || rest.includes('aguila') || rest.includes('colonial'))) {
-        // Es el porcentaje de cacao, lo dejamos
+        // Es el porcentaje de cacao
       } else if (num >= 35) {
         explicitGrams = Math.round(num);
         clean = rest;
@@ -296,7 +299,6 @@ const parseUniversalInput = (rawInput) => {
     }
   }
 
-  // Revisar si hay palabras de medida como "fetas", "rebanadas", "cucharadas", "tazas"
   const rawTokens = clean.split(/\s+/).filter(Boolean);
   const foodTokens = [];
 
@@ -321,32 +323,13 @@ const parseUniversalInput = (rawInput) => {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('inicio');
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
-  const [macroGoals, setMacroGoals] = useState(() => {
-    const saved = localStorage.getItem('trakia_goals');
-    return saved ? JSON.parse(saved) : { protein: 140, carbs: 50, fat: 140 };
-  });
-
-  const [meals, setMeals] = useState(() => {
-    const saved = localStorage.getItem('trakia_meals');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [glucoseLogs, setGlucoseLogs] = useState(() => {
-    const saved = localStorage.getItem('trakia_glucose');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [workouts, setWorkouts] = useState(() => {
-    const saved = localStorage.getItem('trakia_workouts');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [measurements, setMeasurements] = useState(() => {
-    const saved = localStorage.getItem('trakia_measurements');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [macroGoals, setMacroGoals] = useState(() => safeLoadStorage('trakia_goals', { protein: 140, carbs: 50, fat: 140 }));
+  const [meals, setMeals] = useState(() => safeLoadStorage('trakia_meals', []));
+  const [glucoseLogs, setGlucoseLogs] = useState(() => safeLoadStorage('trakia_glucose', []));
+  const [workouts, setWorkouts] = useState(() => safeLoadStorage('trakia_workouts', []));
+  const [measurements, setMeasurements] = useState(() => safeLoadStorage('trakia_measurements', []));
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -366,7 +349,7 @@ export default function App() {
   useEffect(() => { localStorage.setItem('trakia_measurements', JSON.stringify(measurements)); }, [measurements]);
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const todayMeals = meals.filter(m => m.date === todayStr);
+  const todayMeals = (Array.isArray(meals) ? meals : []).filter(m => m && m.date === todayStr);
   
   const consumedProtein = Math.round(todayMeals.reduce((acc, m) => acc + Number(m.protein || 0), 0) * 10) / 10;
   const consumedCarbs = Math.round(todayMeals.reduce((acc, m) => acc + Number(m.carbs || 0), 0) * 10) / 10;
@@ -378,15 +361,14 @@ export default function App() {
   const [newWorkout, setNewWorkout] = useState({ activity: '', duration: '', calories: '' });
   const [newMeasurement, setNewMeasurement] = useState({ weight: '', waist: '', chest: '' });
   
-  // Estados del Buscador Universal
+  // Estados del Buscador Universal (Línea corregida con useState)
   const [searchQuery, setSearchQuery] = useState('');
   const [searchGrams, setSearchGrams] = useState('100');
-  const [detectedUnitInfo, setDetectedUnitInfo] =State('');
+  const [detectedUnitInfo, setDetectedUnitInfo] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchMessage, setSearchMessage] = useState('');
 
-  // Calcula cuántos gramos representan lo que escribió el usuario según el alimento encontrado
   const computeGramsForFood = (parsed, topFood) => {
     if (parsed.explicitGrams) {
       setSearchGrams(String(parsed.explicitGrams));
@@ -401,14 +383,12 @@ export default function App() {
       setSearchGrams(String(totalG));
       setDetectedUnitInfo(`${count} ${label} = ${totalG}g (Cuentas automáticas listas)`);
     } else if (topFood && topFood.unitWeight && topFood.unitWeight !== 100) {
-      // Si el usuario buscó por ej. "huevo" o "pan g4u" sin número, sugerir 1 unidad o mantener gramos activos
       setDetectedUnitInfo(`1 ${topFood.unitName} pesa ~${topFood.unitWeight}g (Puedes tocar 1, 2, 3 abajo)`);
     } else {
       setDetectedUnitInfo('');
     }
   };
 
-  // BÚSQUEDA Y CÁLCULO EN VIVO MIENTRAS ESCRIBES (Para todas las comidas y alimentos)
   const runInstantLocalSearch = (inputVal) => {
     setSearchQuery(inputVal);
     setSearchMessage('');
@@ -442,7 +422,6 @@ export default function App() {
     }
   };
 
-  // BÚSQUEDA COMPLETA (Base Local + 4 Servidores Online con conversión de unidades automática)
   const handleOnlineFoodSearch = async (e) => {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -464,7 +443,6 @@ export default function App() {
       setSearchResults(currentList);
     }
 
-    // Consultar Internet limpiando números y palabras de medida para que busque solo la comida
     if (navigator.onLine && cleanFoodName.length >= 2) {
       const firstWord = parsed.searchWords[0] || cleanFoodName;
       const usdaTerm = USDA_TRANSLATION_MAP[firstWord] || cleanFoodName;
@@ -585,7 +563,6 @@ export default function App() {
     setDetectedUnitInfo('');
   };
 
-  // Carga manual que también hace la regla de tres automática según los gramos que pongas
   const addManualMeal = (e) => {
     e.preventDefault();
     if (!newMeal.name) return;
@@ -823,7 +800,6 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* Botones de unidades/porciones en TODOS los alimentos */}
                         <div className="flex items-center gap-1.5 border-t border-slate-800/80 pt-1.5 flex-wrap">
                           <span className="text-[10px] text-slate-400">Por {uName}:</span>
                           {[1, 2, 3, 4].map(u => (
@@ -848,7 +824,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Carga Manual también con cálculo automático según los gramos */}
             <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl shadow w-full">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                 Carga Manual Autocalculable

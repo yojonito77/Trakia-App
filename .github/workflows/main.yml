@@ -4,7 +4,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Descargar app.jsx del repositorio
+    - name: Descargar app.jsx
       uses: actions/checkout@v4
 
     - name: Configurar Node.js
@@ -12,41 +12,42 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Configurar Java (Para Android)
-      uses: actions/setup-java@v5
+    - name: Configurar Java
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Construir la App Web
+    - name: Preparar y compilar todo
       run: |
         npm create vite@latest trakia-app -- --template react
         cd trakia-app
+        
         npm install
-        npm install recharts lucide-react clsx tailwind-merge framer-motion
+        npm install recharts lucide-react clsx tailwind-merge framer-motion @capacitor/cli @capacitor/core @capacitor/android
         npm install -D tailwindcss postcss autoprefixer
-        npx tailwindcss init -p
+        
+        ./node_modules/.bin/tailwindcss init -p
+        
         echo "/** @type {import('tailwindcss').Config} */" > tailwind.config.js
         echo "export default { content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], theme: { extend: {} }, plugins: [], }" >> tailwind.config.js
         echo "@tailwind base; @tailwind components; @tailwind utilities;" > src/index.css
+        
         cp ../app.jsx src/App.jsx
+        
         npm run build
+        
+        ./node_modules/.bin/cap init Trakia com.trakia.app --web-dir dist
+        ./node_modules/.bin/cap add android
+        ./node_modules/.bin/cap sync android
 
-    - name: Generar Estructura Android
-      run: |
-        cd trakia-app
-        npm install @capacitor/cli @capacitor/core @capacitor/android
-        npx @capacitor/cli init Trakia com.trakia.app --web-dir dist
-        npx @capacitor/cli add android
-        npx @capacitor/cli sync android
-
-    - name: Compilar APK Final
+    - name: Generar instalador APK
       working-directory: ./trakia-app/android
       run: |
         chmod +x gradlew
         ./gradlew assembleDebug
 
-    - name: Guardar archivo listo para descargar
+    - name: Subir Trakia-APK
       uses: actions/upload-artifact@v4
       with:
         name: Trakia-APK

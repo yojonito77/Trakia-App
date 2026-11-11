@@ -6,7 +6,6 @@ import {
   Droplet, 
   Ruler, 
   Settings, 
-  Plus, 
   Trash2, 
   Search
 } from 'lucide-react';
@@ -166,12 +165,12 @@ export default function App() {
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setActiveTab('comidas')} className="p-3 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left transition">
                   <Utensils className="w-5 h-5 text-emerald-400 mb-1" />
-                  <div className="font-semibold text-sm">Registrar Comida</div>
+                  <div className="font-semibold text-sm text-white">Registrar Comida</div>
                   <div className="text-xs text-slate-400">Control de macros</div>
                 </button>
                 <button onClick={() => setActiveTab('glucosa')} className="p-3 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left transition">
                   <Droplet className="w-5 h-5 text-rose-400 mb-1" />
-                  <div className="font-semibold text-sm">Glucemia</div>
+                  <div className="font-semibold text-sm text-white">Glucemia</div>
                   <div className="text-xs text-slate-400">Valores en sangre</div>
                 </button>
               </div>
@@ -192,7 +191,7 @@ export default function App() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                 />
-                <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm transition">
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm transition flex items-center justify-center">
                   <Search className="w-4 h-4 text-slate-950" />
                 </button>
               </form>
@@ -507,4 +506,12 @@ export default function App() {
             onClick={() => setActiveTab('ajustes')} 
             className={`flex flex-col items-center py-1 ${activeTab === 'ajustes' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
           >
-            <Settings className="w-5 h-5 mb-0.
+            <Settings className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium">Ajustes</span>
+          </button>
+        </div>
+      </nav>
+
+    </div>
+  );
+}

@@ -17,10 +17,8 @@ import {
 } from 'lucide-react';
 
 export default function App() {
-  // Estado de navegación (6 pestañas)
   const [activeTab, setActiveTab] = useState('inicio');
 
-  // Datos principales almacenados en localStorage para acceso instantáneo (0ms)
   const [meals, setMeals] = useState(() => {
     const saved = localStorage.getItem('trakia_meals');
     return saved ? JSON.parse(saved) : [];
@@ -41,14 +39,12 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Metas diarias (Macros)
   const macroGoals = {
-    protein: 140, // g
-    carbs: 50,    // g
-    fat: 160      // g
+    protein: 140, 
+    carbs: 50,    
+    fat: 160      
   };
 
-  // Guardar en localStorage automáticamente
   useEffect(() => {
     localStorage.setItem('trakia_meals', JSON.stringify(meals));
   }, [meals]);
@@ -65,7 +61,6 @@ export default function App() {
     localStorage.setItem('trakia_measurements', JSON.stringify(measurements));
   }, [measurements]);
 
-  // Totales del día actual
   const todayStr = new Date().toISOString().split('T')[0];
   const todayMeals = meals.filter(m => m.date === todayStr);
   
@@ -73,7 +68,6 @@ export default function App() {
   const consumedCarbs = todayMeals.reduce((acc, m) => acc + Number(m.carbs), 0);
   const consumedFat = todayMeals.reduce((acc, m) => acc + Number(m.fat), 0);
 
-  // Estados para formularios dinámicos (evitando scroll horizontal)
   const [newMeal, setNewMeal] = useState({ name: '', protein: '', carbs: '', fat: '', grams: '' });
   const [newGlucose, setNewGlucose] = useState({ value: '', type: 'Ayunas', notes: '' });
   const [newWorkout, setNewWorkout] = useState({ activity: '', duration: '', calories: '' });
@@ -82,7 +76,6 @@ export default function App() {
   const [searchResult, setSearchResult] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Funciones de agregado
   const addMeal = (e) => {
     e.preventDefault();
     if (!newMeal.name) return;
@@ -111,13 +104,11 @@ export default function App() {
     setNewMeasurement({ weight: '', waist: '', chest: '' });
   };
 
-  // Motor de búsqueda IA simulado bajo jerarquía (Sheets -> USDA -> Brands)
   const handleAISearch = (e) => {
     e.preventDefault();
     if (!searchQuery) return;
     setIsSearching(true);
     setTimeout(() => {
-      // Simulación de respuesta estricta baja en carbohidratos, sin pescados/berenjena/coliflor
       setSearchResult({
         item: searchQuery,
         source: "Base de Datos USDA / Reconocida",
@@ -131,7 +122,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-20">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-24">
       
       {/* Cabecera Principal */}
       <header className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-30 shadow-md">
@@ -193,7 +184,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PESTAÑA: COMIDAS Y BUSCADOR IA */}
+        {/* PESTAÑA: COMIDAS */}
         {activeTab === 'comidas' && (
           <div className="space-y-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow">
@@ -204,10 +195,10 @@ export default function App() {
                   placeholder="Ej: Pechuga de pollo, queso..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                 />
                 <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm transition">
-                  <Search className="w-4 h-4" />
+                  <Search className="w-4 h-4 text-slate-950" />
                 </button>
               </form>
               {isSearching && <p className="text-xs text-slate-400 mt-2">Consultando bases de datos (Sheets → USDA → Brands)...</p>}
@@ -228,7 +219,7 @@ export default function App() {
                   placeholder="Nombre del alimento / plato" 
                   value={newMeal.name}
                   onChange={(e) => setNewMeal({...newMeal, name: e.target.value})}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                 />
                 <div className="grid grid-cols-3 gap-2">
                   <input 
@@ -236,21 +227,21 @@ export default function App() {
                     placeholder="Prot (g)" 
                     value={newMeal.protein}
                     onChange={(e) => setNewMeal({...newMeal, protein: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                   />
                   <input 
                     type="number" 
                     placeholder="Carb (g)" 
                     value={newMeal.carbs}
                     onChange={(e) => setNewMeal({...newMeal, carbs: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                   />
                   <input 
                     type="number" 
                     placeholder="Grasa (g)" 
                     value={newMeal.fat}
                     onChange={(e) => setNewMeal({...newMeal, fat: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-semibold py-2.5 rounded-xl text-sm transition">
@@ -267,7 +258,7 @@ export default function App() {
                 todayMeals.map(m => (
                   <div key={m.id} className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center">
                     <div>
-                      <div className="font-semibold text-sm">{m.name}</div>
+                      <div className="font-semibold text-sm text-white">{m.name}</div>
                       <div className="text-xs text-slate-400">P: {m.protein}g | C: {m.carbs}g | G: {m.fat}g</div>
                     </div>
                     <button onClick={() => setMeals(meals.filter(item => item.id !== m.id))} className="text-rose-400 hover:text-rose-300 p-1">
@@ -292,7 +283,7 @@ export default function App() {
                     placeholder="Valor (mg/dL)" 
                     value={newGlucose.value}
                     onChange={(e) => setNewGlucose({...newGlucose, value: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-rose-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500"
                   />
                   <select 
                     value={newGlucose.type}
@@ -343,7 +334,7 @@ export default function App() {
                   placeholder="Actividad (Caminata, corebag...)" 
                   value={newWorkout.activity}
                   onChange={(e) => setNewWorkout({...newWorkout, activity: e.target.value})}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <input 
@@ -351,14 +342,14 @@ export default function App() {
                     placeholder="Duración (min)" 
                     value={newWorkout.duration}
                     onChange={(e) => setNewWorkout({...newWorkout, duration: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                   <input 
                     type="number" 
                     placeholder="Calorías (kcal)" 
                     value={newWorkout.calories}
                     onChange={(e) => setNewWorkout({...newWorkout, calories: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
                 <button type="submit" className="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-semibold py-2.5 rounded-xl text-sm transition">
@@ -400,7 +391,7 @@ export default function App() {
                   placeholder="Peso (kg)" 
                   value={newMeasurement.weight}
                   onChange={(e) => setNewMeasurement({...newMeasurement, weight: e.target.value})}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <input 
@@ -409,7 +400,7 @@ export default function App() {
                     placeholder="Cintura (cm)" 
                     value={newMeasurement.waist}
                     onChange={(e) => setNewMeasurement({...newMeasurement, waist: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
                   />
                   <input 
                     type="number" 
@@ -417,7 +408,7 @@ export default function App() {
                     placeholder="Pecho (cm)" 
                     value={newMeasurement.chest}
                     onChange={(e) => setNewMeasurement({...newMeasurement, chest: e.target.value})}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-sm transition">
@@ -510,6 +501,7 @@ export default function App() {
           </button>
 
           <button 
+            onClick={() =>}-{activeTab === 'medidas'}
             onClick={() => setActiveTab('medidas')} 
             className={`flex flex-col items-center py-1 ${activeTab === 'medidas' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
           >

@@ -23,7 +23,7 @@ jobs:
         npx --yes create-vite trakia-app --template react
         cd trakia-app
         npm install
-        npm install recharts lucide-react
+        npm install recharts lucide-react clsx tailwind-merge framer-motion
         npm install -D tailwindcss postcss autoprefixer
         npx tailwindcss init -p
         echo "/** @type {import('tailwindcss').Config} */" > tailwind.config.js
@@ -42,7 +42,9 @@ jobs:
 
     - name: Compilar APK Final
       working-directory: ./trakia-app/android
-      run: ./gradlew assembleDebug
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
     - name: Guardar archivo listo para descargar
       uses: actions/upload-artifact@v3

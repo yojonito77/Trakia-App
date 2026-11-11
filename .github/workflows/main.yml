@@ -10,7 +10,7 @@ jobs:
     - name: Configurar Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '24'
+        node-version: '22'
 
     - name: Configurar Java (Para Android)
       uses: actions/setup-java@v5
@@ -20,7 +20,7 @@ jobs:
 
     - name: Construir la App Web
       run: |
-        npx --yes create-vite trakia-app --template react
+        npm create vite@latest trakia-app -- --template react
         cd trakia-app
         npm install
         npm install recharts lucide-react clsx tailwind-merge framer-motion
@@ -36,9 +36,9 @@ jobs:
       run: |
         cd trakia-app
         npm install @capacitor/cli @capacitor/core @capacitor/android
-        npx cap init Trakia com.trakia.app --web-dir dist
-        npx cap add android
-        npx cap sync android
+        npx @capacitor/cli init Trakia com.trakia.app --web-dir dist
+        npx @capacitor/cli add android
+        npx @capacitor/cli sync android
 
     - name: Compilar APK Final
       working-directory: ./trakia-app/android

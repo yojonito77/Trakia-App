@@ -27,7 +27,7 @@ jobs:
         npm install recharts lucide-react clsx tailwind-merge framer-motion @capacitor/cli @capacitor/core @capacitor/android
         npm install -D tailwindcss postcss autoprefixer
         
-        ./node_modules/.bin/tailwindcss init -p
+        npx tailwindcss init -p
         
         echo "/** @type {import('tailwindcss').Config} */" > tailwind.config.js
         echo "export default { content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], theme: { extend: {} }, plugins: [], }" >> tailwind.config.js
@@ -37,9 +37,9 @@ jobs:
         
         npm run build
         
-        ./node_modules/.bin/cap init Trakia com.trakia.app --web-dir dist
-        ./node_modules/.bin/cap add android
-        ./node_modules/.bin/cap sync android
+        npx cap init Trakia com.trakia.app --web-dir dist
+        npx cap add android
+        npx cap sync android
 
     - name: Generar instalador APK
       working-directory: ./trakia-app/android

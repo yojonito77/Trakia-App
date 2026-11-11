@@ -8,12 +8,7 @@ import {
   Settings, 
   Plus, 
   Trash2, 
-  CheckCircle2, 
-  Flame, 
-  Heart, 
-  TrendingUp,
-  Search,
-  AlertCircle
+  Search
 } from 'lucide-react';
 
 export default function App() {
@@ -501,7 +496,6 @@ export default function App() {
           </button>
 
           <button 
-            onClick={() =>}-{activeTab === 'medidas'}
             onClick={() => setActiveTab('medidas')} 
             className={`flex flex-col items-center py-1 ${activeTab === 'medidas' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
           >
@@ -513,12 +507,4 @@ export default function App() {
             onClick={() => setActiveTab('ajustes')} 
             className={`flex flex-col items-center py-1 ${activeTab === 'ajustes' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}
           >
-            <Settings className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-medium">Ajustes</span>
-          </button>
-        </div>
-      </nav>
-
-    </div>
-  );
-}
+            <Settings className="w-5 h-5 mb-0.

@@ -27,10 +27,11 @@ jobs:
         npm install lucide-react @capacitor/cli @capacitor/core @capacitor/android
         npm install -D tailwindcss postcss autoprefixer
         
-        npx tailwindcss init -p
-        
+        # Crear configuración de Tailwind directamente sin comandos npx
         echo "/** @type {import('tailwindcss').Config} */" > tailwind.config.js
         echo "export default { content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'], theme: { extend: {} }, plugins: [], }" >> tailwind.config.js
+        
+        echo "export default { plugins: { tailwindcss: {}, autoprefixer: {}, }, }" > postcss.config.js
         
         echo "@tailwind base;" > src/index.css
         echo "@tailwind components;" >> src/index.css
@@ -40,6 +41,7 @@ jobs:
         
         npm run build
         
+        # Crear configuración de Capacitor directamente
         echo '{"appId": "com.trakia.app", "appName": "Trakia", "webDir": "dist"}' > capacitor.config.json
         
         npx --yes @capacitor/cli add android
